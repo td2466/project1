@@ -195,7 +195,7 @@ Once you have made some changes to your web application, you will deploy it to y
 1. Run the python server with the defaults, which will listen for requests on port 8111.  Run with `--help` if you need help
 
         cd project1/webserver
-        python server.py
+        python server.py --debug
 
 
 1. Go to `http://<IP ADDRESS>:8111/` in your browser to check that it worked.  
@@ -211,7 +211,7 @@ run the the web server with:
 
 To run the webserver, go into the `webserver/` directory and run (make sure you have enabled the `virtualenv` environment)
 
-        python server.py 
+        python server.py --debug
 
 It should print something like:
 
@@ -223,13 +223,13 @@ So if this is running on your laptop, you can open you web browser to `http://lo
 
 You can specify a custom port by passing a host and port as arguments:
 
-        python server.py 0.0.0.0 8888
+        python server.py --debug 0.0.0.0 8888
 
 To see its command line options, use the `--help` flag
 
         python server.py --help
 
-If you run the server with the `--debug` flag, it will automatically pick up changes when you reload the page, which is more convenient than restarting the server each time.
+If you run the server with the `--debug` flag, it will automatically pick up changes when you reload the page, which is more convenient than restarting the server each time. It additionally will display detailed errors in the web browser, instead of only on the console.
 
 **note**: This is just a *suggestion*. Since it is impossible to support setting up Python on everyone's
 personal computers, we can't really help debug issues that aren't happening on an Azure VM. Your best
