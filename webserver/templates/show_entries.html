@@ -1,20 +1,14 @@
-<!DOCTYPE html>
+
 <html>
   
 {% extends "index.html" %}
 <body>
   {% if session.logged_in %}
   <h1>User Info</h1>
-  <div>{{data}}</div>
+  <div>{{data2}}</div>
 
   {% endif %}
   
-  <ul class=entries>
-  {% for entry in entries %}
-    <li><h2>{{ entry.title }}</h2>{{ entry.text|safe }}
-  {% else %}
-    <li><em>Unbelievable.  No entries here so far</em>
-  {% endfor %}
-  </ul>
-    </body>
+
+</body>
 </html>
