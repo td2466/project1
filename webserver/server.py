@@ -208,6 +208,18 @@ def login():
             return redirect(url_for('show_entries'))
     return render_template('index.html', error=error)
     
+@app.route('/show_entries')
+def show_entries():
+  print request.args
+  curUser = request.form['username']
+  cursor = g.conn.execute("SELECT * FROM Users WHERE username = curUser")  # how to establish a connection btw this usrn & input
+  info = []
+  for result in cursor:
+    info.append(result['*'])  # can also be accessed using result[0]
+  cursor.close()
+  context = dict(data2 = info)
+  return render_template("show_entries.html")
+  
 if __name__ == "__main__":
   import click
 
