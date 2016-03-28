@@ -23,7 +23,7 @@
             
         </div>
 
-<p><a href="/another">Go to the other page</a></p>
+
 
   {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
   <form action="{{ url_for('login') }}" method=post>
@@ -35,6 +35,18 @@
       <dd><input type=submit value=Login>
     </dl>
   </form>
+
+
+  
+<!--{% extends "index.html" %}--> 
+
+  {% if session.logged_in %}
+  <h1>User Info</h1>
+  <div>{{data2}}</div>
+
+  {% endif %}
+  
+
 
 
 </body>
