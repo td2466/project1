@@ -186,13 +186,6 @@ def index():
 def another():
   return render_template("anotherfile.html")
 
-
-# Example of adding new data to the database
-@app.route('/add', methods=['POST'])
-def add():
-  name = request.form['name']
-  g.conn.execute('INSERT INTO test VALUES (NULL, ?)', name)
-  return redirect('/')
   
 @app.route('/login', methods=['GET', 'POST'])
 def login():
