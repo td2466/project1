@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html>
-<body>
   
 {% extends "index.html" %}
-
+<body>
   {% if session.logged_in %}
   <h1>User Info</h1>
   <div>{{data}}</div>
