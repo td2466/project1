@@ -1,0 +1,18 @@
+{% extends "common.html" %}
+{% block title %}Payment{% endblock %}
+{% block body %}
+    <h1>Payment Info Page</h1>
+    <p>Username: {{username}}</p>
+    <ul>
+      {% for usercard in usercardlist %}
+      <li>{{ usercard['type'] }}, {{ usercard['number'] }}</li>
+      {% endfor %}
+    </ul>
+
+    <form action="{{ url_for('comment') }}" method="post">
+      PAY NOW<br />
+      <input type="submit" value="Pay now" />
+      <input type="hidden" name="username" value="{{username}}" />
+    </form>
+
+{% endblock %}

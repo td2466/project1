@@ -1,0 +1,20 @@
+{% extends "common.html" %}
+{% block title %}Ebook: {{ ebookInfo['isbn'] }}{% endblock %}
+{% block body %}
+    <h1>Ebook</h1>
+    <p>Everything about the Ebook.</p>
+    <!--<div>{{userData}}</div>-->
+    <div>
+      {% for n in ebookInfo %}
+      <div> {{n}} </div>
+      {% endfor %}
+    </div>
+
+    <form action="{{ url_for('confirm') }}" method="post">
+      Please enter the number you would like to buy:<br />
+      <input type="text" name="itemNumber" /><br />
+      <input type="submit" value="Confirm" />
+      <input type="hidden" name="isbn" value="{{ebookInfo['isbn']}}" />
+      <input type="hidden" name="username" value="{{username}}" />
+    </form>
+{% endblock %}

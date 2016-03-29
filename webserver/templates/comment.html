@@ -1,0 +1,14 @@
+{% extends "common.html" %}
+{% block title %}Comment{% endblock %}
+{% block body %}
+    <h1>User Comment Page</h1>
+    <p>Username: {{username}}</p>
+    <p>Your comment:</p>
+    <ul>
+      {% for usercom in usercomment %}
+      <li>{{ usercom['timestamp'] }}, {{ usercom['comment'] }}</li>
+      {% endfor %}
+    </ul>
+
+<p><a href="/loginpage">Return home</a></p>
+{% endblock %}

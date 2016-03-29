@@ -1,0 +1,10 @@
+{% extends "common.html" %}
+{% block title %}Ebook List{% endblock %}
+{% block body %}
+	<h1> Select Ebook </h1>
+	<ul>
+      {% for book in ebookList %}
+      <li><a href="ebook/{{book['isbn']}}">{{book['title']}}</a> {{book['isbn']}}</li>
+      {% endfor %}
+	</ul>
+{% endblock %}
