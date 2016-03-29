@@ -9,6 +9,13 @@
       <li>{{ usercom['timestamp'] }}, {{ usercom['comment'] }}</li>
       {% endfor %}
     </ul>
+    <h3>Write new Comment</h3>
+    <form action="/addcomment" method="post">
+      <textarea rows="5" cols="40" name="commenttext"></textarea><br />
+      <input type="submit" value="Submit Comment" />
+      <input type="hidden" name="username" value="{{username}}" />
+    </form>
 
-<p><a href="/loginpage">Return home</a></p>
+
+<p><a href="/">Return home</a></p>
 {% endblock %}

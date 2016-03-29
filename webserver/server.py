@@ -1,91 +1,5 @@
 #!/usr/bin/env python2.7
 
-# My comments: (Jialiu Wang)
-# There are some concepts/names we must understand before using these tools.
-# For the most part, we are using three things:
-#   HTML for web pages
-#   FLASK for handling database
-#   JINJA for generating HTML from templates
-#
-# HTML uses tags to arrange its contents.
-# We are using a lot of different tags, including (but not constrained to):
-#   <!--   --> for comments
-#   <!DOCTYPE> for document declaration
-#   <a>   </a> for hyperlinks
-#   <br />     for line breaks
-#   <dl>       for definition lists
-#       <dd>   </dd>        component of definition lists
-#       <dt>   </dt>        component of definition lists
-#   </dl>      for definition lists
-#   <h1>   </h1>    for headings of different sizes
-#   <h2>   </h2>    for headings of different sizes
-#   <h3>   </h3>    for headings of different sizes
-#   <h4>   </h4>    for headings of different sizes
-#   <h5>   </h5>    for headings of different sizes
-#   <h6>   </h6>    for headings of different sizes
-#   <head>   </head>    for head section of an HTML document
-#   <html>   </html>    for the whole HTML document
-#   <input />  for various kinds of input field
-#   <p>   </p> for a (simple) paragraph
-#   <title>   </title>      for the title of page (displayed on top of the browser toolbar)
-#   <ul>       for unordered lists
-#       <li>   </li>        component of unordered lists
-#   </ul>      for unordered lists
-# For more information and better understanding on HTML,
-# I recommend reading http://www.w3school.com.cn/tags/ (in Chinese)
-# and http://www.w3schools.com/tags/ (in English).
-#
-# FLASK is a micro webdevelopment framework for Python.
-# It is used as an imported class (Flask class as imported in this
-# python code).
-# `app = Flask(__name__, template_folder=tmpl_dir)`
-# So `app` is an instance of Flask class in our code.
-# @app.route() is called a route() decorator. A route() decorator
-# is used to bind a function to a URL. Inside the parenthesis
-# is (generally) the URL which will trigger the corresponding
-# function.
-# The function that a route() decorator is bound to (of course)
-# has a name. The name is called "endpoint" in Flask. Therefore,
-# each route() decorator binds a URL with an endpoint function.
-# But as programmers, we love variables and using variables to
-# achieve fancy things. The URL used in route() decorator
-# has variable (or I should call it "dynamic") parts like
-# <variable_name>. Such a dynamic name will also be a parameter
-# of the endpoint function the (variable) URL binds to.
-# Another important usage of Flask is, the url_for() function.
-# In our project, url_for() functions can be called from Jinja
-# templates and give us the disired URLs. url_for() function
-# takes endpoint (name of function) as input.
-# Flask is used to generate dynamic HTML pages based on user
-# inputs in our project, guide and redirect user from page
-# to page, call Jinja to render HTML pages, communicate with
-# the database and handle user
-# input as in HTML forms. Therefore it is the core part of this
-# project.
-# Flask can also handle different HTTP methods, which is also
-# used in this project.
-# For more information and better, comprehensive understanding
-# on Flask, I recommend reading
-# http://flask.pocoo.org/docs/0.10/quickstart/
-# and more documents on Flask documentation site:
-# http://flask.pocoo.org/docs/0.10/
-#
-# JINJA is a tool for designing text file templates. It is
-# able to generate templates for various kinds of text files
-# such as HTML, XML, CSV, LaTeX etc.
-# It has variables, statements, comments, control structures
-# as a programming language. And more importantly, Jinja has
-# a very useful feature called templates inheritance.
-# It would be extremely easy to use Jinja to write your own
-# templates for structured text files, if you have extensive
-# experience on programming.
-# Jinja mainly use syntax like {{ item }} to represent
-# expressions, {% for ... %} to represent statements (control
-# structures). With these in mind, it is very easy to understand
-# a template written with Jinja.
-# Recommended reading
-# http://jinja.pocoo.org/docs/dev/templates/
-
 """
 Columbia W4111 Intro to databases
 Example webserver
@@ -102,6 +16,7 @@ Read about it online.
 """
 
 import os
+import time
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
 from flask import Flask, request, render_template, g, redirect, Response, url_for
@@ -218,11 +133,11 @@ def login():
 #
 # example of a database query
 #
-    cursor = g.conn.execute("SELECT username FROM Users")
-    names = []
-    for result in cursor:
-        names.append(result['username'])  # can also be accessed using result[0]
-    cursor.close()
+    #cursor = g.conn.execute("SELECT username FROM Users")
+    #names = []
+    #for result in cursor:
+        #names.append(result['username'])  # can also be accessed using result[0]
+    #cursor.close()
 
 #
 # Flask uses Jinja templates, which is an extension to HTML where you can
@@ -250,6 +165,17 @@ def login():
 #     <div>{{n}}</div>
 #     {% endfor %}
 #
+#
+# render_template looks in the templates/ folder for files.
+# for example, the below file reads template/index.html
+#
+    #return render_template("login.html", **context)
+
+    cursor = g.conn.execute("SELECT username FROM Users")
+    names = []
+    for result in cursor:
+        names.append(result['username'])
+    cursor.close()
     context = dict(data = names)
 
     message = None
@@ -277,11 +203,6 @@ def login():
             context['error'] = message
             return render_template('login.html', **context)
         return redirect(url_for('user', username = request.form['username']))
-
-#
-# render_template looks in the templates/ folder for files.
-# for example, the below file reads template/index.html
-#
     return render_template("login.html", **context)
 
 @app.route('/user/<username>')
@@ -334,10 +255,18 @@ def confirm():
         cursor = g.conn.execute("SELECT oid FROM Have_Orders")
         for row in cursor:
             oid_list.append(int(row['oid']))
+        cursor.close()
+        cursor = g.conn.execute("SELECT oid FROM Add_to")
+        for row in cursor:
+            oid_list.append(int(row['oid']))
+        cursor.close()
+        cursor = g.conn.execute("SELECT oid FROM Orders_Pay")
+        for row in cursor:
+            oid_list.append(int(row['oid']))
+        cursor.close()
         oid = max(oid_list) + 1
         g.conn.execute("INSERT INTO Have_Orders VALUES (%d, '%s')" % (oid, request.form['username']))
         g.conn.execute("INSERT INTO Add_to VALUES (%d, '%s', %d)" % (itemnumber, request.form['isbn'], oid))
-        #g.conn.execute("INSERT INTO Orders_Pay VALUES (%d, %d)" % (oid, number))
         context['isbn'] = request.form['isbn']
         context['itemNumber'] = request.form['itemNumber']
  
@@ -363,6 +292,7 @@ def payment():
     print request.args
     context = dict()
     context['username'] = request.form['username']
+    context['oid'] = request.form['selectedoid']
     cursor = g.conn.execute("SELECT type, number FROM Own_Cards WHERE username='" + request.form['username'] + "'")
     user_card_list = []
     for row in cursor: 
@@ -375,8 +305,14 @@ def payment():
 def comment():
     print request.args
     context = dict()
-    context['username'] = request.form['username']
-    cursor = g.conn.execute("SELECT timestamp, comment FROM Submit_Comments WHERE username='" + request.form['username'] + "'")
+    if request.method == 'POST':
+        context['username'] = request.form['username']
+        card_number = request.form['cardnumber']
+        oid = int(request.form['oid'])
+        g.conn.execute("INSERT INTO Orders_Pay VALUES (%d, '%s')" % (oid, card_number))
+    elif request.method == 'GET':
+        context['username'] = request.args['username']
+    cursor = g.conn.execute("SELECT timestamp, comment FROM Submit_Comments WHERE username='" + context['username'] + "'")
     user_comment = []
     for row in cursor: 
         user_comment.append(row)
@@ -384,9 +320,16 @@ def comment():
     context['usercomment'] = user_comment
     return render_template("comment.html", **context)
 
-@app.route('/loginpage')
-def loginpage():
-    return render_template("login.html")
+@app.route('/addcomment', methods=['GET', 'POST'])
+def add_comment():
+    print request.args
+    timestamp = time.strftime("%d %b %Y")
+    g.conn.execute("INSERT INTO Submit_Comments VALUES ('%s', '%s', '%s')" % (timestamp, request.form['username'], request.form['commenttext']))
+    return redirect('/comment?username=%s' % (request.form['username']))
+
+#@app.route('/loginpage')
+#def loginpage():
+    #return render_template("login.html")
     
 # This is an example of a different path.  You can see it at
 # 
