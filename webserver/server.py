@@ -180,29 +180,39 @@ def login():
 
     message = None
     if request.method == 'POST':
-        cursor = g.conn.execute("SELECT username FROM Users WHERE username='" + request.form['username'] + "'")
-        counter = 0
-        for row in cursor:
-            counter += 1
-        cursor.close()
-        if counter != 1:
-            message = 'Invalid username'
-            context['error'] = message
-            return render_template('login.html', **context)
+        if "TABLE" not in request.form['username'] and  "table" not in request.form['username']:
+            cursor = g.conn.execute("SELECT username FROM Users WHERE username='" + request.form['username'] + "'")
+            counter = 0
+            for row in cursor:
+                counter += 1
+            cursor.close()
+            if counter != 1:
+                message = 'Invalid username'
+                context['error'] = message
+                return render_template('login.html', **context)
 
-        cursor = g.conn.execute("SELECT password FROM Users WHERE username='" + request.form['username'] + "'")
-        counter = 0
-        passwdFound = ''
-        for row in cursor:
-            if counter == 0:
-                passwdFound = row['password']
-            counter += 1
-        cursor.close()
-        if passwdFound != request.form['password']:
-            message = 'Invalid password'
+        else:
+            message = 'Malicious input'
             context['error'] = message
             return render_template('login.html', **context)
-        return redirect(url_for('user', username = request.form['username']))
+        if "TABLE" not in request.form['password'] and "table" not in request.form['password']:                                                                                         
+            cursor = g.conn.execute("SELECT password FROM Users WHERE username='" + request.form['username'] + "'")
+            counter = 0
+            passwdFound = ''
+            for row in cursor:
+                if counter == 0:
+                    passwdFound = row['password']
+                counter += 1
+            cursor.close()
+            if passwdFound != request.form['password']:
+                message = 'Invalid password'
+                context['error'] = message
+                return render_template('login.html', **context)
+            return redirect(url_for('user', username = request.form['username']))
+        else:
+            message = 'Malicious input'
+            context['error'] = message
+            return render_template("login.html", ** context)
     return render_template("login.html", **context)
 
 @app.route('/user/<username>')
@@ -247,52 +257,64 @@ def confirm():
     
     #request.form['itemNumber']
     #request.form['isbn']
-    itemnumber = int(request.form['itemNumber'])
-    context = dict()
-    context['username'] = request.form['username']
-    if itemnumber > 0:
-        oid_list = []
-        cursor = g.conn.execute("SELECT oid FROM Have_Orders")
+    try: 
+        int(request.form['itemNumber'])
+
+        itemnumber = int(request.form['itemNumber'])
+        context = dict()
+        context['username'] = request.form['username']
+        if itemnumber > 0:
+            oid_list = []
+            cursor = g.conn.execute("SELECT oid FROM Have_Orders")
+            for row in cursor:
+                oid_list.append(int(row['oid']))
+            cursor.close()
+            cursor = g.conn.execute("SELECT oid FROM Add_to")
+            for row in cursor:
+                oid_list.append(int(row['oid']))
+            cursor.close()
+            cursor = g.conn.execute("SELECT oid FROM Orders_Pay")
+            for row in cursor:
+                oid_list.append(int(row['oid']))
+            cursor.close()
+            oid = max(oid_list) + 1
+            g.conn.execute("INSERT INTO Have_Orders VALUES (%d, '%s')" % (oid, request.form['username']))
+            g.conn.execute("INSERT INTO Add_to VALUES (%d, '%s', %d)" % (itemnumber, request.form['isbn'], oid))
+            context['isbn'] = request.form['isbn']
+            context['itemNumber'] = request.form['itemNumber']
+     
+        else:
+            context['error'] = "Invalid number of books ordered"
+            return redirect(url_for('ebook', isbn = request.form['isbn'], username = request.form['username']))
+        cursor = g.conn.execute("SELECT oid, isbn, quantity FROM Add_to")
+        order_list = []
         for row in cursor:
-            oid_list.append(int(row['oid']))
+            order_list.append(row)
         cursor.close()
-        cursor = g.conn.execute("SELECT oid FROM Add_to")
+        context['orderlist'] = order_list
+        cursor = g.conn.execute("SELECT oid FROM Have_Orders WHERE username='" + request.form['username'] + "'")
+        user_oid_list = []
         for row in cursor:
-            oid_list.append(int(row['oid']))
+            user_oid_list.append(row['oid'])
         cursor.close()
-        cursor = g.conn.execute("SELECT oid FROM Orders_Pay")
-        for row in cursor:
-            oid_list.append(int(row['oid']))
-        cursor.close()
-        oid = max(oid_list) + 1
-        g.conn.execute("INSERT INTO Have_Orders VALUES (%d, '%s')" % (oid, request.form['username']))
-        g.conn.execute("INSERT INTO Add_to VALUES (%d, '%s', %d)" % (itemnumber, request.form['isbn'], oid))
-        context['isbn'] = request.form['isbn']
-        context['itemNumber'] = request.form['itemNumber']
- 
-    else:
-        context['error'] = "Invalid number of books ordered"
-        #return redirect(url_for('user', username = request.form['username']))
-    cursor = g.conn.execute("SELECT oid, isbn, quantity FROM Add_to")
-    order_list = []
-    for row in cursor:
-        order_list.append(row)
-    cursor.close()
-    context['orderlist'] = order_list
-    cursor = g.conn.execute("SELECT oid FROM Have_Orders WHERE username='" + request.form['username'] + "'")
-    user_oid_list = []
-    for row in cursor:
-        user_oid_list.append(row['oid'])
-    cursor.close()
-    context['useroidlist'] = user_oid_list
-    return render_template("order.html", **context)
+        context['useroidlist'] = user_oid_list
+        return render_template("order.html", **context)
+    except ValueError:
+        return redirect(url_for('ebook', isbn = request.form['isbn'], username = request.form['username']))
+    
     
 @app.route('/payment', methods=['GET', 'POST'])
 def payment():
     print request.args
     context = dict()
     context['username'] = request.form['username']
-    context['oid'] = request.form['selectedoid']
+    #context['oid'] = request.form['selectedoid']
+    oid_list = []
+    cursor = g.conn.execute("SELECT oid FROM Have_Orders")
+    for row in cursor:
+        oid_list.append(int(row['oid']))
+    cursor.close()
+    context['oid'] = max(oid_list)
     cursor = g.conn.execute("SELECT type, number FROM Own_Cards WHERE username='" + request.form['username'] + "'")
     user_card_list = []
     for row in cursor: 
@@ -306,10 +328,23 @@ def comment():
     print request.args
     context = dict()
     if request.method == 'POST':
-        context['username'] = request.form['username']
-        card_number = request.form['cardnumber']
-        oid = int(request.form['oid'])
-        g.conn.execute("INSERT INTO Orders_Pay VALUES (%d, '%s')" % (oid, card_number))
+        
+            context['username'] = request.form['username']
+            card_number = request.form['cardnumber']
+            #oid = int(request.form['oid'])
+
+            cursor = g.conn.execute("SELECT oid FROM Orders_Pay WHERE oid='" + request.form['oid'] + "'")
+            counter = 0
+            for row in cursor:
+                counter += 1
+            cursor.close()
+            if counter == 0:
+                oid = int(request.form['oid'])
+                g.conn.execute("INSERT INTO Orders_Pay VALUES (%d, '%s')" % (oid, card_number))
+                
+            else:
+                return redirect('confirm', username = request.args['username'], isbn = request.args['isbn'], itemNumber = request.args['itemNumber'])
+        
     elif request.method == 'GET':
         context['username'] = request.args['username']
     cursor = g.conn.execute("SELECT timestamp, comment FROM Submit_Comments WHERE username='" + context['username'] + "'")
@@ -323,8 +358,14 @@ def comment():
 @app.route('/addcomment', methods=['GET', 'POST'])
 def add_comment():
     print request.args
-    timestamp = time.strftime("%d %b %Y")
-    g.conn.execute("INSERT INTO Submit_Comments VALUES ('%s', '%s', '%s')" % (timestamp, request.form['username'], request.form['commenttext']))
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+    context = dict()
+    if "FROM" not in request.form['commenttext'] and "from" not in request.form['commenttext'] and "TABLE" not in request.form['commenttext'] and "table" not in request.form['commenttext'] and "INTO" not in request.form['commenttext'] and "into" not in request.form['commenttext']:
+        g.conn.execute("INSERT INTO Submit_Comments VALUES ('%s', '%s', '%s')" % (request.form['username'], request.form['commenttext'], timestamp))
+    else:
+            message = 'Malicious input'
+            context['error'] = message
+            return redirect('/comment?username=%s' % (request.form['username']))
     return redirect('/comment?username=%s' % (request.form['username']))
 
 #@app.route('/loginpage')
@@ -395,7 +436,7 @@ if __name__ == "__main__":
 
     HOST, PORT = host, port
     print "running on %s:%d" % (HOST, PORT)
-    app.run(host=HOST, port=PORT, debug=True, threaded=threaded)
+    app.run(host=HOST, port=PORT, debug=False, threaded=threaded)
 
 
   run()

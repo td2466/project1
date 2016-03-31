@@ -11,11 +11,11 @@
     <p>Username: {{username}}</p>
     <p>ISBN of book just ordered: {{isbn}}</p>
     <form action="{{ url_for('payment') }}" method="post">
-    <p>Your orders (oid): (Choose one to pay)</p>
+    <p>Your orders (oid): </p>
     <ul>
         {% for oid in useroidlist %}
         <li>{{ oid }}
-        <input type="radio" name="selectedoid" value="{{oid}}" /></li>
+        <input type="hidden" name="selectedoid" value="{{oid}}" /></li>
         {% endfor %}
     </ul>
       <input type="submit" value="Confirm" />

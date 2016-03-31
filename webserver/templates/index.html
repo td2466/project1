@@ -1,0 +1,46 @@
+<html>
+  <style>
+    body{ 
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+
+<body>
+  <h1>Select Username</h1>
+  <div><ul class="dropdown-menu">
+            <li><a href="https://realpython.com/blog/python/primer-on-jinja-templating/">ruyuex</a></li>
+            <li><a href="#">tiand</a></li>
+            <li><a href="#">evanj</a></li>
+            <li><a href="#">tomj</a></li>
+            <li><a href="#">franzl</a></li>
+            <li><a href="https://realpython.com/blog/python/primer-on-jinja-templating/">fredericc</a></li>
+            <li><a href="#">wolfm</a></li>
+            <li><a href="#">jackj</a></li>
+            <li><a href="#">beatlesb</a></li>
+            <li><a href="#">db</a></li>
+            
+        </div>
+
+
+
+  {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+  <form action="{{ url_for('login') }}" method=post>
+    <dl>
+      <dt>Username:
+      <dd><input type=text name=username>
+      <dt>Password:
+      <dd><input type=password name=password>
+      <dd><input type=submit value=Login>
+    </dl>
+  </form>
+
+
+
+
+
+</body>
+
+
+</html>
